@@ -10,7 +10,7 @@
 [![OpenCV](https://img.shields.io/badge/OpenCV-Computer%20Vision-green.svg)](https://opencv.org/)
 [![Dockerize](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
 
-![UI Screenshot](media/screenshot.png)
+[UI Screenshot](media/screenshot.png)
 
 </div>
 
