@@ -34,7 +34,7 @@ The repository includes the training pipeline as well as a **fully containerized
 ## 📂 Project Structure
 
 ```text
-Ml_Project/
+Project/
 ├── prediction_service/       # The deployable Web Microservice
 │   ├── app.py                # Flask server
 │   ├── model/                # Contains the .h5 model file
