@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Activity Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ============ RESET & BASE ============ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0a0e17;
+            color: #e0e6ed;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ============ ANIMATED BACKGROUND ============ */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 60% 80%, rgba(14, 165, 233, 0.05) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ============ LAYOUT ============ */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* ============ HEADER ============ */
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: #8b95a5;
+            margin-top: 0.5rem;
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        /* ============ MODE CARDS ============ */
+        .mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .mode-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mode-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .mode-card:hover {
+            border-color: rgba(96, 165, 250, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(96, 165, 250, 0.1);
+        }
+
+        .mode-card:hover::before { opacity: 1; }
+
+        .mode-card.active {
+            border-color: rgba(96, 165, 250, 0.5);
+            background: rgba(96, 165, 250, 0.08);
+        }
+
+        .mode-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .mode-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            position: relative;
+        }
+
+        .mode-card p {
+            font-size: 0.85rem;
+            color: #6b7a8d;
+            position: relative;
+        }
+
+        /* ============ UPLOAD FORM ============ */
+        .upload-zone {
+            display: none;
+            margin-bottom: 1.5rem;
+            animation: slideDown 0.3s ease;
+        }
+
+        .upload-zone.visible { display: block; }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .upload-form {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        .upload-form:hover { border-color: rgba(96, 165, 250, 0.4); }
+
+        .upload-form label {
+            display: inline-block;
+            padding: 0.7rem 2rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .upload-form label:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .upload-form input[type="file"] { display: none; }
+
+        .file-name {
+            margin-top: 0.8rem;
+            color: #8b95a5;
+            font-size: 0.85rem;
+        }
+
+        .upload-btn {
+            margin-top: 1rem;
+            padding: 0.6rem 2.5rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .upload-btn.visible { display: inline-block; }
+        .upload-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        /* ============ VIDEO DISPLAY ============ */
+        .video-container {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .video-container.visible { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .video-wrapper {
+            position: relative;
+            background: #111827;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .video-wrapper img {
+            width: 100%;
+            display: block;
+            border-radius: 16px;
+        }
+
+        .live-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 0.35rem 1rem;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(8px);
+        }
+
+        .live-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ============ CONTROLS ============ */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.65rem 2rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-stop {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-stop:hover {
+            background: rgba(239, 68, 68, 0.25);
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.06);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ============ STATUS BAR ============ */
+        .status-bar {
+            margin-top: 1.5rem;
+            text-align: center;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-bar .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .status-bar .dot.green { background: #10b981; box-shadow: 0 0 8px #10b981; }
+        .status-bar .dot.gray { background: #4b5563; }
+
+        .status-text {
+            font-size: 0.85rem;
+            color: #8b95a5;
+        }
+
+        /* ============ FOOTER ============ */
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: #4b5563;
+            font-size: 0.8rem;
+        }
+
+        /* ============ TOP RIGHT BUTTON ============ */
+        .top-right-back {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 0.6rem 1.2rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e0e6ed;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        .top-right-back:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 640px) {
+            .mode-selector { grid-template-columns: 1fr; }
+            .header h1 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="top-right-back" id="topRightBack">
+        <span style="font-size:1.1em;">🏠</span> Main Menu
+    </a>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚗 Driver Activity Monitor</h1>
+            <p>Real-time distracted driver detection powered by VGG16</p>
+        </div>
+
+        <!-- Mode Selection -->
+        <div class="mode-selector" id="modeSelector">
+            <div class="mode-card" id="webcamCard" onclick="selectMode('webcam')">
+                <span class="icon">📹</span>
+                <h3>Live Camera</h3>
+                <p>Stream your webcam with real-time predictions</p>
+            </div>
+            <div class="mode-card" id="uploadCard" onclick="selectMode('upload')">
+                <span class="icon">📁</span>
+                <h3>Upload Video</h3>
+                <p>Analyze a pre-recorded video file</p>
+            </div>
+        </div>
+
+        <!-- Upload Zone (hidden by default) -->
+        <div class="upload-zone" id="uploadZone">
+            <form class="upload-form" id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+                <label for="videoInput">Choose a video file</label>
+                <input type="file" name="video" id="videoInput" accept="video/*" onchange="onFileSelected(this)">
+                <div class="file-name" id="fileName">No file selected</div>
+                <button type="submit" class="upload-btn" id="uploadBtn">▶ Start Analysis</button>
+            </form>
+        </div>
+
+        <!-- Video Stream Display -->
+        <div class="video-container" id="videoContainer">
+            <div class="video-wrapper">
+                <img id="videoStream" src="" alt="Video Stream">
+                <div class="live-badge" id="liveBadge">LIVE</div>
+            </div>
+            <div class="controls">
+                <button class="btn btn-back" onclick="goBack()" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">← Stop & Go Back</button>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar" id="statusBar">
+            <span class="dot gray" id="statusDot"></span>
+            <span class="status-text" id="statusText">Select a mode to begin</span>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Driver Activity Detection Microservice &middot; VGG16 Transfer Learning
+        </div>
+    </div>
+
+    <script>
+        // ---- State ----
+        let currentMode = null;
+        const params = new URLSearchParams(window.location.search);
+
+        // Auto-start upload stream if redirected after upload
+        if (params.get('mode') === 'upload') {
+            startStream('upload');
+        }
+
+        // ---- Mode Selection ----
+        function selectMode(mode) {
+            currentMode = mode;
+
+            // Highlight selected card
+            document.getElementById('webcamCard').classList.toggle('active', mode === 'webcam');
+            document.getElementById('uploadCard').classList.toggle('active', mode === 'upload');
+
+            // Show/hide upload zone
+            document.getElementById('uploadZone').classList.toggle('visible', mode === 'upload');
+
+            if (mode === 'webcam') {
+                startStream('webcam');
+            } else {
+                // Hide video if switching to upload without a file
+                document.getElementById('videoContainer').classList.remove('visible');
+                setStatus('gray', 'Choose a video file to analyze');
+            }
+        }
+
+        // ---- File Selection ----
+        function onFileSelected(input) {
+            if (input.files.length > 0) {
+                document.getElementById('fileName').textContent = input.files[0].name;
+                document.getElementById('uploadBtn').classList.add('visible');
+            }
+        }
+
+        // ---- Start Stream ----
+        function startStream(source) {
+            const container = document.getElementById('videoContainer');
+            const stream = document.getElementById('videoStream');
+            const badge = document.getElementById('liveBadge');
+
+            stream.src = '/video_feed?source=' + source + '&t=' + Date.now();
+            container.classList.add('visible');
+            badge.textContent = source === 'webcam' ? 'LIVE' : 'VIDEO';
+
+            // Hide mode selector
+            document.getElementById('modeSelector').style.display = 'none';
+            document.getElementById('uploadZone').classList.remove('visible');
+
+            setStatus('green', source === 'webcam'
+                ? 'Webcam stream active — predictions running'
+                : 'Processing uploaded video — predictions running');
+        }
+
+        // ---- Go Back ----
+        function goBack() {
+            const source = currentMode || (params.get('mode') === 'upload' ? 'upload' : 'webcam');
+            
+            // Stop stream visually
+            document.getElementById('videoStream').src = '';
+            document.getElementById('videoContainer').classList.remove('visible');
+            
+            // Re-show menu
+            document.getElementById('modeSelector').style.display = 'grid';
+            document.getElementById('webcamCard').classList.remove('active');
+            document.getElementById('uploadCard').classList.remove('active');
+            
+            // Clear URL and go back
+            window.location.href = '/';
+        }
+
+        // ---- Status Helper ----
+        function setStatus(color, text) {
+            const dot = document.getElementById('statusDot');
+            dot.className = 'dot ' + color;
+            document.getElementById('statusText').textContent = text;
+        }
+    </script>
+</body>
+</html>

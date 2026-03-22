@@ -1,0 +1,33 @@
+# Environments
+tf-gpu/
+venv/
+env/
+.env
+__pycache__/
+*.pyc
+
+# Agent/IDE Workspaces
+.gemini/
+.vscode/
+.idea/
+
+# Large Files & ML Models
+# Note: Models > 100MB cannot be pushed to standard GitHub without Git LFS
+*.h5
+*.keras
+*.pb
+*.tflite
+model/
+prediction_service/model/
+
+# Media and Data
+data/
+media/
+prediction_service/uploads/
+*.mp4
+*.avi
+*.jpg
+*.png
+
+# Logs
+*.log
