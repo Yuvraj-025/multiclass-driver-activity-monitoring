@@ -11,6 +11,7 @@
 [![Dockerize](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
 
 ![UI Screenshot](media/screenshot.png)
+![Working Screenshot](media/screenshot2.png)
 
 </div>
 
