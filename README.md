@@ -53,7 +53,7 @@ Project/
 
 ## 🚀 Getting Started (Microservice)
 
-Because the pre-trained `best_model_finetuned_v1.h5` model file is larger than 100MB, it is ignored by Git. **You must download the model and place it in the `prediction_service/model/` directory before running the app.**
+Because the pre-trained `best_model_finetuned_v1.h5` model file is larger than 100MB, it is ignored by Git. **You must train the model and place it in the `prediction_service/model/` directory before running the app.**
 
 ### Option 1: Run Locally (Windows/Native)
 *(Recommended if you want to use the Live Webcam feature, as Docker/WSL blocks native camera access)*
